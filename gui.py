@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import wx
 import os
 ID_ABOUT=101
@@ -40,7 +40,7 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, ID_ABOUT, self.OnAbout)
         wx.EVT_MENU(self, ID_EXIT, self.OnExit)
         wx.EVT_MENU(self, ID_OPEN, self.OnOpen)
-        wx.EVT_MENU(self, ID_SAVE, self.OnSave); 
+        wx.EVT_MENU(self, ID_SAVE, self.OnSaveFile) 
 
         # Show it !!!
         self.Show(1)
@@ -82,7 +82,8 @@ class MainWindow(wx.Frame):
         # application. In theory, you could create one earlier, store it in
         # your frame object and change it when it was called to reflect
         # current parameters / values
-        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", 
+                wx.ID_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.filename=dlg.GetFilename()
             self.dirname=dlg.GetDirectory()
@@ -103,7 +104,7 @@ class MainWindow(wx.Frame):
         # Save away the edited text
         # Open the file, do an RU sure check for an overwrite!
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", \
-                wx.SAVE | wx.OVERWRITE_PROMPT)
+                wx.ID_SAVE | wx.FD_OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             # Grab the content to be saved
             itcontains = self.control.GetValue()
@@ -125,7 +126,22 @@ class MainWindow(wx.Frame):
             # the text is actually changed, could also be altered on "save" ...
         # Get rid of the dialog to keep things tidy
         dlg.Destroy()
+    #-----------------------------------------------------------------------
+    def OnSaveFile(self, event):
+        dlg = wx.FileDialog(self, "Save file as...",
+                self.dirname, "", "*.*", wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            #path = dlg.GetPath()
+            itcontains = self.control.GetValue()
 
+            self.filename   = dlg.GetFilename()
+            self.dirname    = dlg.GetDirectory()
+            filehandle  = open(os.path.join(self.dirname, self.filename),'w')
+            filehandle.write(itcontains)
+            filehandle.close()
+            print("you chose the following filename:%s" % filehandle)
+        dlg.Destroy()
+    #------------------------------------------------------------------------
 # Set up a window based app, and create a main window in it
 app = wx.PySimpleApp()
 view = MainWindow(None, "Text editor")
